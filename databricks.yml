@@ -1,0 +1,12 @@
+bundle:
+  name: Databricks_Deployement
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-ec639244-edaa.cloud.databricks.com

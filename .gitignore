@@ -1,0 +1,6 @@
+.databricks/
+src_code.zip
+__pycache__/
+*.pyc
+.venv/
+.env

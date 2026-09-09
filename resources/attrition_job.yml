@@ -1,0 +1,21 @@
+resources:
+  jobs:
+    attrition_ml_pipeline:
+      name: "[${bundle.target}] Employee Attrition ML Pipeline"
+
+      tasks:
+        - task_key: run_attrition_pipeline
+
+          spark_python_task:
+            python_file: ../src/main.py
+
+          environment_key: default
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - "xgboost"
+              - "optuna==3.6.1"
+                      
