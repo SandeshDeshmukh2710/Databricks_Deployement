@@ -8,5 +8,9 @@ targets:
   dev:
     mode: development
     default: true
+
     workspace:
       host: https://dbc-ec639244-edaa.cloud.databricks.com
+
+    run_as:
+      service_principal_name: "d83550cf-2251-43a8-911d-1403bdd563dc"
