@@ -56,14 +56,19 @@ jobs:
           DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
         run: |
           databricks bundle deploy -t dev
-      - name: Check deployed job
+
+      - name: Check deployed bundle
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
           DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
         run: |
+          echo "=== GitHub Databricks Identity ==="
+          databricks current-user me
+
+          echo "=== Deployed Bundle ==="
           databricks bundle summary -t dev
-          
+
       - name: Run ML Pipeline
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
