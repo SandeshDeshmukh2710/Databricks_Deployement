@@ -47,8 +47,7 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
     print("="*80)
 
     mlflow.set_registry_uri("databricks-uc")
-    mlflow.set_experiment("/Workspace/Users/sandesh.deshmukh@bizmetric.com/Employee_Attrition_Prediction")
-
+    mlflow.set_experiment("/Shared/Employee_Attrition_Prediction")
 
     with mlflow.start_run(run_name=run_name) as run:
         # Log hyperparameters
