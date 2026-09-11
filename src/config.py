@@ -31,7 +31,7 @@ TEST_PATH = f"{DATA_PATH}test.csv"
 # =============================================================================
 # ARTIFACT DIRECTORIES
 # =============================================================================
-ARTIFACTS_DIR = "/Shared/Attrition/artifacts"
+ARTIFACTS_DIR = "/Workspace/Users/d83550cf-2251-43a8-911d-1403bdd563dc/Attrition/artifacts"
 MODELS_DIR = f"{ARTIFACTS_DIR}/models"
 PLOTS_DIR = f"{ARTIFACTS_DIR}/plots"
 OUTPUTS_DIR = f"{ARTIFACTS_DIR}/outputs"
