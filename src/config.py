@@ -31,7 +31,7 @@ TEST_PATH = f"{DATA_PATH}test.csv"
 # =============================================================================
 # ARTIFACT DIRECTORIES
 # =============================================================================
-ARTIFACTS_DIR = "/Workspace/Users/sandesh.deshmukh@bizmetric.com/Attrition/artifacts"
+ARTIFACTS_DIR = "/Shared/Attrition/artifacts"
 MODELS_DIR = f"{ARTIFACTS_DIR}/models"
 PLOTS_DIR = f"{ARTIFACTS_DIR}/plots"
 OUTPUTS_DIR = f"{ARTIFACTS_DIR}/outputs"
