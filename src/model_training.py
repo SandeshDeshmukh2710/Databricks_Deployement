@@ -8,20 +8,17 @@ Model Training Pipeline:
 3. Train final XGBoost model with optimal parameters
 4. Evaluate model performance
 """
-
-import pandas as pd
-import numpy as np
-import xgboost as xgb
-import optuna
-from optuna.samplers import TPESampler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-)
 import warnings
-warnings.filterwarnings('ignore')
+
+import optuna
+import xgboost as xgb
+from optuna.samplers import TPESampler
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.model_selection import train_test_split
 
 import config
+
+warnings.filterwarnings('ignore')
 
 # =============================================================================
 # TRAIN-VALIDATION-TEST SPLIT
@@ -58,13 +55,13 @@ def split_data(X, y, train_size=config.TRAIN_SIZE, val_size=config.VAL_SIZE,
         X_temp, y_temp, test_size=val_ratio, random_state=random_state, stratify=y_temp
     )
     
-    print(f"\n✅ Data split complete (stratified sampling):")
+    print("\n✅ Data split complete (stratified sampling):")
     print(f"   Training set:   {X_train.shape[0]:,} samples ({train_size*100:.0f}%)")
     print(f"   Validation set: {X_val.shape[0]:,} samples ({val_size*100:.0f}%)")
     print(f"   Test set:       {X_test.shape[0]:,} samples ({test_size*100:.0f}%)")
     
     # Check class distribution
-    print(f"\n✅ Class distribution preserved:")
+    print("\n✅ Class distribution preserved:")
     print(f"   Training - Left: {y_train.sum()}/{len(y_train)} ({y_train.mean()*100:.1f}%)")
     print(f"   Validation - Left: {y_val.sum()}/{len(y_val)} ({y_val.mean()*100:.1f}%)")
     print(f"   Test - Left: {y_test.sum()}/{len(y_test)} ({y_test.mean()*100:.1f}%)")
@@ -94,7 +91,7 @@ def optimize_hyperparameters(X_train, y_train, X_val, y_val, n_trials=config.OPT
     print("HYPERPARAMETER OPTIMIZATION - OPTUNA")
     print("="*80)
     print(f"\n📌 Tuning 4 most important parameters with {n_trials} trials")
-    print(f"   Parameters: max_depth, learning_rate, n_estimators, subsample")
+    print("   Parameters: max_depth, learning_rate, n_estimators, subsample")
     
     def objective(trial):
         """
@@ -132,9 +129,9 @@ def optimize_hyperparameters(X_train, y_train, X_val, y_val, n_trials=config.OPT
     
     study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
     
-    print(f"\n✅ Optimization complete!")
+    print("\n✅ Optimization complete!")
     print(f"   Best {config.OPTUNA_METRIC.upper()}: {study.best_value:.4f}")
-    print(f"   Best parameters:")
+    print("   Best parameters:")
     for param, value in study.best_params.items():
         print(f"      {param}: {value}")
     
@@ -246,7 +243,7 @@ def train_model_pipeline(X, y, n_trials=config.OPTUNA_N_TRIALS):
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
     
     # Optimize hyperparameters
-    best_params, study = optimize_hyperparameters(
+    best_params, _study = optimize_hyperparameters(
         X_train, y_train, X_val, y_val, n_trials=n_trials
     )
     

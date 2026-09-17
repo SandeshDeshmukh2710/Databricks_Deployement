@@ -12,10 +12,9 @@ Pipeline:
 """
 
 import config
-
 from feature_engineering import prepare_features
-from model_training import train_model_pipeline
 from model_registry import register_model_pipeline
+from model_training import train_model_pipeline
 from scoring import score_pipeline
 
 
@@ -33,7 +32,7 @@ def main():
     print("STEP 1: FEATURE ENGINEERING")
     print("=" * 80)
 
-    X_train, y_train, encoders, features, removed, ids = prepare_features(
+    X_train, y_train, encoders, features, removed, _ids = prepare_features(
         config.TRAIN_PATH,
         fit=True,
         select=True

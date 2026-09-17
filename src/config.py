@@ -13,6 +13,7 @@ Contains:
 """
 
 import os
+
 import numpy as np
 
 # =============================================================================
@@ -31,13 +32,30 @@ TEST_PATH = f"{DATA_PATH}test.csv"
 # =============================================================================
 # ARTIFACT DIRECTORIES
 # =============================================================================
-ARTIFACTS_DIR = "/Workspace/Users/d83550cf-2251-43a8-911d-1403bdd563dc/Attrition/artifacts"
+
+# Databricks runtime uses the Databricks Workspace path.
+# Local development and CI use a local project directory.
+if os.path.exists("/Workspace"):
+    ARTIFACTS_DIR = (
+        "/Workspace/Users/"
+        "d83550cf-2251-43a8-911d-1403bdd563dc/"
+        "Attrition/artifacts"
+    )
+else:
+    ARTIFACTS_DIR = "./artifacts"
+
 MODELS_DIR = f"{ARTIFACTS_DIR}/models"
 PLOTS_DIR = f"{ARTIFACTS_DIR}/plots"
 OUTPUTS_DIR = f"{ARTIFACTS_DIR}/outputs"
 
-# Create directories if they don't exist
-for directory in [ARTIFACTS_DIR, MODELS_DIR, PLOTS_DIR, OUTPUTS_DIR]:
+# Create artifact directories if they don't exist.
+
+for directory in [
+    ARTIFACTS_DIR,
+    MODELS_DIR,
+    PLOTS_DIR,
+    OUTPUTS_DIR,
+]:
     os.makedirs(directory, exist_ok=True)
 
 # =============================================================================
@@ -108,7 +126,7 @@ def categorize_risk(probability):
     else:
         return 'High Risk'
 
-print(f"✅ Configuration loaded successfully")
+print("✅ Configuration loaded successfully")
 print(f"   Random State: {RANDOM_STATE}")
 print(f"   Train Path: {TRAIN_PATH}")
 print(f"   Test Path: {TEST_PATH}")

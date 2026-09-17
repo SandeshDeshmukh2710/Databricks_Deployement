@@ -10,14 +10,15 @@ Feature Engineering Pipeline:
 
 All transformations are designed to be reproducible for inference.
 """
-
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
 import warnings
-warnings.filterwarnings('ignore')
+
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 import config
+
+warnings.filterwarnings('ignore')
 
 # =============================================================================
 # DATA LOADING
@@ -203,7 +204,7 @@ def encode_categoricals(df, encoders=None, fit=True):
             else:
                 print(f"⚠️ Warning: No encoder found for {col}")
     
-    print(f"\n✅ Categorical encoding complete")
+    print("\n✅ Categorical encoding complete")
     
     return df_encoded, encoders
 
@@ -244,7 +245,7 @@ def select_features(df, threshold=config.CORRELATION_THRESHOLD):
     # Remove highly correlated features
     df_selected = df.drop(columns=to_remove)
     
-    print(f"\n✅ Feature selection complete")
+    print("\n✅ Feature selection complete")
     print(f"   Final features for modeling: {df_selected.shape[1]}")
     
     return df_selected, to_remove

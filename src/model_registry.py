@@ -9,17 +9,19 @@ Model Registry Pipeline:
 4. Save preprocessing artifacts for inference
 """
 
+import json
+import os
+import pickle
+import warnings
+
 import mlflow
 import mlflow.xgboost
-from mlflow.models.signature import infer_signature
-import json
-import pickle
-import os
-import warnings
 import xgboost as xgb
-warnings.filterwarnings('ignore')
+from mlflow.models.signature import infer_signature
 
 import config
+
+warnings.filterwarnings('ignore')
 
 # =============================================================================
 # MLFLOW LOGGING
@@ -79,7 +81,7 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
         
         run_id = run.info.run_id
         
-        print(f"\n✅ Model logged to MLflow")
+        print("\n✅ Model logged to MLflow")
         print(f"   Run ID: {run_id}")
         print(f"   Run Name: {run_name}")
     
@@ -215,7 +217,7 @@ def load_model_artifacts():
         artifacts['metadata'] = json.load(f)
     print(f"✅ Model metadata loaded: {metadata_path}")
     
-    print(f"\n✅ All artifacts loaded successfully")
+    print("\n✅ All artifacts loaded successfully")
     
     return artifacts
 
