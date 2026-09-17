@@ -8,19 +8,22 @@ Utility functions:
 3. Data validation helpers
 """
 
-import pandas as pd
-import numpy as np
+import warnings
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from sklearn.metrics import (
-    confusion_matrix, classification_report,
-    roc_curve, roc_auc_score,
-    precision_recall_curve, average_precision_score
+    average_precision_score,
+    classification_report,
+    confusion_matrix,
+    precision_recall_curve,
+    roc_auc_score,
+    roc_curve,
 )
-import warnings
+
 warnings.filterwarnings('ignore')
 
-import config
 
 # Set plot style
 sns.set_style('whitegrid')
@@ -41,7 +44,7 @@ def plot_confusion_matrices(y_train, y_train_pred, y_val, y_val_pred,
         y_test, y_test_pred: Test true and predicted labels
         save_path (str): Path to save plot
     """
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    _fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     
     datasets = [
         (y_train, y_train_pred, 'Training Set'),
@@ -95,7 +98,7 @@ def plot_roc_pr_curves(y_train, y_train_proba, y_val, y_val_proba,
         y_test, y_test_proba: Test labels and probabilities
         save_path (str): Path to save plot
     """
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    _fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     
     # ROC Curve
     ax1 = axes[0]
@@ -200,7 +203,7 @@ def print_classification_metrics(y_true, y_pred, y_proba, dataset_name="Dataset"
     print("="*80)
     
     # Calculate metrics
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
     
     metrics = {
         'Accuracy': accuracy_score(y_true, y_pred),

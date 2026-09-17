@@ -10,16 +10,17 @@ Scoring Pipeline:
 5. Generate prediction outputs
 """
 
-import pandas as pd
-import numpy as np
-import xgboost as xgb
 # import shap
 import warnings
-warnings.filterwarnings('ignore')
+
+import numpy as np
+import pandas as pd
 
 import config
 from feature_engineering import prepare_features
 from model_registry import load_model_artifacts
+
+warnings.filterwarnings('ignore')
 
 # =============================================================================
 # LOAD MODEL FOR INFERENCE
@@ -38,7 +39,7 @@ def load_inference_model():
     
     artifacts = load_model_artifacts()
     
-    print(f"\n✅ Inference model ready")
+    print("\n✅ Inference model ready")
     print(f"   Model: {artifacts['metadata']['model_type']}")
     print(f"   Features: {artifacts['metadata']['n_features']}")
     
@@ -162,7 +163,7 @@ def explain_predictions(model, X, feature_names, sample_size=1000):
     # Compute SHAP values
     shap_values = explainer.shap_values(X)
     
-    print(f"\n✅ SHAP values computed")
+    print("\n✅ SHAP values computed")
     
     return explainer, shap_values
 
@@ -239,6 +240,7 @@ def predict_single_employee(model_artifacts, employee_data):
     y_proba = model.predict_proba(X)[0]
     
     # Compute SHAP
+    import shap
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X)
     
@@ -307,7 +309,7 @@ def score_pipeline(test_file_path, save_output=True, explain=True):
     # Compute SHAP explanations
     shap_values = None
     if explain:
-        explainer, shap_values = explain_predictions(
+        _explainer, shap_values = explain_predictions(
             model_artifacts['model'],
             X_test,
             model_artifacts['feature_names']

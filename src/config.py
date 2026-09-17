@@ -13,6 +13,7 @@ Contains:
 """
 
 import os
+
 import numpy as np
 
 # =============================================================================
@@ -125,7 +126,7 @@ def categorize_risk(probability):
     else:
         return 'High Risk'
 
-print(f"✅ Configuration loaded successfully")
+print("✅ Configuration loaded successfully")
 print(f"   Random State: {RANDOM_STATE}")
 print(f"   Train Path: {TRAIN_PATH}")
 print(f"   Test Path: {TEST_PATH}")
