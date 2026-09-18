@@ -8,9 +8,24 @@ targets:
   dev:
     mode: development
     default: true
-
     workspace:
       host: https://dbc-ec639244-edaa.cloud.databricks.com
-
     run_as:
       service_principal_name: "d83550cf-2251-43a8-911d-1403bdd563dc"
+
+  qa:
+    mode: development
+    workspace:
+      host: https://dbc-ec639244-edaa.cloud.databricks.com
+    run_as:
+      service_principal_name: "d83550cf-2251-43a8-911d-1403bdd563dc"
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-ec639244-edaa.cloud.databricks.com
+      root_path: /Workspace/Users/sandesh.deshmukh@bizmetric.com/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: "d83550cf-2251-43a8-911d-1403bdd563dc"
+
+      
