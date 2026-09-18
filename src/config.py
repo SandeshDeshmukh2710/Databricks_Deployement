@@ -131,3 +131,11 @@ print(f"   Random State: {RANDOM_STATE}")
 print(f"   Train Path: {TRAIN_PATH}")
 print(f"   Test Path: {TEST_PATH}")
 print(f"   Artifacts Directory: {ARTIFACTS_DIR}")
+
+
+QUALITY_GATE = {
+    "test_roc_auc": 0.85,
+    "test_recall": 0.70,
+    "test_f1": 0.70,
+}
+

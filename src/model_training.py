@@ -222,6 +222,57 @@ def train_final_model(X_train, y_train, X_val, y_val, X_test, y_test, best_param
     
     return final_model, metrics
 
+def validate_model_quality(metrics):
+    """
+    Validate final model performance against quality-gate thresholds.
+
+    Args:
+        metrics (dict): Model metrics for train, validation, and test sets.
+
+    Returns:
+        bool: True if all quality gates pass.
+
+    Raises:
+        ValueError: If any quality gate fails.
+    """
+    test_metrics = metrics["test"]
+
+    checks = {
+        "test_roc_auc": test_metrics["roc_auc"],
+        "test_recall": test_metrics["recall"],
+        "test_f1": test_metrics["f1"],
+    }
+
+    print("\n" + "=" * 80)
+    print("MODEL QUALITY GATE")
+    print("=" * 80)
+
+    failed_checks = []
+
+    for metric_name, actual_value in checks.items():
+        threshold = config.QUALITY_GATE[metric_name]
+
+        passed = actual_value >= threshold
+
+        status = "PASS" if passed else "FAIL"
+
+        print(
+            f"{metric_name.upper():15s}: "
+            f"{actual_value:.4f} >= {threshold:.4f} → {status}"
+        )
+
+        if not passed:
+            failed_checks.append(metric_name)
+
+    if failed_checks:
+        raise ValueError(
+            "Model Quality Gate FAILED for: "
+            + ", ".join(failed_checks)
+        )
+
+    print("\n✅ MODEL QUALITY GATE PASSED")
+
+    return True
 
 # =============================================================================
 # COMPLETE TRAINING PIPELINE
@@ -251,6 +302,8 @@ def train_model_pipeline(X, y, n_trials=config.OPTUNA_N_TRIALS):
     model, metrics = train_final_model(
         X_train, y_train, X_val, y_val, X_test, y_test, best_params
     )
+
+    validate_model_quality(metrics)
     
     # Package split data
     data_splits = {
@@ -270,3 +323,5 @@ if __name__ == "__main__":
     # Test the pipeline
     print("This module should be imported, not run directly.")
     print("Use: from model_training import train_model_pipeline")
+
+    

@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -92,3 +93,31 @@ def test_invalid_satisfaction_value():
     result = create_features(df)
 
     assert result["Job Satisfaction"].isna().iloc[0]
+
+def test_quality_gate_passes():
+    from model_training import validate_model_quality
+
+    good_metrics = {
+        "test": {
+            "roc_auc": 0.8539,
+            "recall": 0.7434,
+            "f1": 0.7458,
+        }
+    }
+
+    assert validate_model_quality(good_metrics) is True
+
+
+def test_quality_gate_fails():
+    from model_training import validate_model_quality
+
+    bad_metrics = {
+        "test": {
+            "roc_auc": 0.60,
+            "recall": 0.50,
+            "f1": 0.55,
+        }
+    }
+
+    with pytest.raises(ValueError, match="Model Quality Gate FAILED"):
+        validate_model_quality(bad_metrics)
