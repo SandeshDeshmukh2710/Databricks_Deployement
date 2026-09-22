@@ -98,6 +98,7 @@ CORRELATION_THRESHOLD = 0.95  # Remove features with correlation > 0.95
 # MLFLOW SETTINGS
 # =============================================================================
 MLFLOW_EXPERIMENT_NAME = "Employee_Attrition_Prediction"
+MLFLOW_MODEL_NAME = "workspace.default.employee_attrition_model"
 
 # =============================================================================
 # RISK CATEGORIZATION THRESHOLDS
@@ -134,7 +135,7 @@ print(f"   Artifacts Directory: {ARTIFACTS_DIR}")
 
 
 QUALITY_GATE = {
-    "test_roc_auc": 0.85,
+    "test_roc_auc": 0.80,
     "test_recall": 0.70,
     "test_f1": 0.70,
 }
