@@ -48,6 +48,8 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
     print("MLFLOW MODEL LOGGING")
     print("="*80)
 
+    os.environ["MLFLOW_USE_DATABRICKS_SDK_MODEL_ARTIFACTS_REPO_FOR_UC"] = "True"
+    
     mlflow.set_registry_uri("databricks-uc")
     mlflow.set_experiment(f"/Shared/{config.MLFLOW_EXPERIMENT_NAME}")
 
