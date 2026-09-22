@@ -49,7 +49,7 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
     print("="*80)
 
     mlflow.set_registry_uri("databricks-uc")
-    mlflow.set_experiment("/Shared/Employee_Attrition_Prediction")
+    mlflow.set_experiment(f"/Shared/{config.MLFLOW_EXPERIMENT_NAME}")
 
     with mlflow.start_run(run_name=run_name) as run:
         # Log hyperparameters
@@ -70,9 +70,9 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
             model,
             artifact_path="model",
             signature=signature,
-            input_example=X_train.head(3)
-        )
-        
+            input_example=X_train.head(3),
+            registered_model_name=config.MLFLOW_MODEL_NAME)
+    
         # Log feature names as artifact
         with open("feature_names.json", "w") as f:
             json.dump(feature_names, f)
