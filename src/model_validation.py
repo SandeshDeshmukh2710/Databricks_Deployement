@@ -5,7 +5,9 @@ import config
 from feature_engineering import prepare_features
 from model_registry import load_model_artifacts
 
-MODEL_URI = "models:/workspace.default.employee_attrition_model@qa"
+MODEL_URI = (
+    f"models:/{config.MLFLOW_MODEL_NAME}@{config.QA_MODEL_ALIAS}"
+)
 
 
 def validate_qa_model(test_file_path):
