@@ -1,3 +1,4 @@
+# ruff: noqa: F821
 # =============================================================================
 # ATTRITION ML PIPELINE - END-TO-END ORCHESTRATOR
 # =============================================================================
@@ -67,7 +68,7 @@ def main():
     print("STEP 3: MODEL REGISTRY / MLFLOW")
     print("=" * 80)
 
-    run_id, artifacts = register_model_pipeline(
+    run_id, model_version, artifacts = register_model_pipeline(
         model=model,
         X_train=data_splits["X_train"],
         y_train=data_splits["y_train"],
@@ -80,6 +81,12 @@ def main():
 
     print("\n✅ Model Registry completed")
     print(f"   MLflow Run ID: {run_id}")
+    print(f"   Model Version: {model_version}")
+
+    dbutils.jobs.taskValues.set(
+        key="model_version",
+        value=str(model_version)
+    )
 
     # =========================================================================
     # 4. SCORING

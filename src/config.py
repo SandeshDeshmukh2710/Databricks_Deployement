@@ -100,6 +100,9 @@ CORRELATION_THRESHOLD = 0.95  # Remove features with correlation > 0.95
 MLFLOW_EXPERIMENT_NAME = "Employee_Attrition_Prediction"
 MLFLOW_MODEL_NAME = "workspace.default.employee_attrition_model"
 
+QA_MODEL_ALIAS = "qa"
+PROD_MODEL_ALIAS = "prod"
+
 # =============================================================================
 # RISK CATEGORIZATION THRESHOLDS
 # =============================================================================
