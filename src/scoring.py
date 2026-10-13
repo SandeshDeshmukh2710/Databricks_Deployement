@@ -13,8 +13,17 @@ Scoring Pipeline:
 # import shap
 import warnings
 
+import mlflow
 import numpy as np
 import pandas as pd
+from pyspark.sql import SparkSession
+from pyspark.sql.types import (
+    DateType,
+    DoubleType,
+    StringType,
+    StructField,
+    StructType,
+)
 
 import config
 from feature_engineering import prepare_features
@@ -28,21 +37,35 @@ warnings.filterwarnings('ignore')
 
 def load_inference_model():
     """
-    Load trained model and all required artifacts
-    
-    Returns:
-        dict: Dictionary with model, encoders, and metadata
+    Load production model from Unity Catalog and
+    load preprocessing artifacts required for inference.
     """
-    print("\n" + "="*80)
-    print("LOADING INFERENCE MODEL")
-    print("="*80)
-    
+
+    print("\n" + "=" * 80)
+    print("LOADING PRODUCTION INFERENCE MODEL")
+    print("=" * 80)
+
+    # Load preprocessing artifacts
     artifacts = load_model_artifacts()
-    
-    print("\n✅ Inference model ready")
-    print(f"   Model: {artifacts['metadata']['model_type']}")
+
+    # Load production model from Unity Catalog
+    model_uri = (
+        f"models:/{config.MLFLOW_MODEL_NAME}@{config.PROD_MODEL_ALIAS}"
+    )
+
+    print("\nLoading model from Unity Catalog...")
+    print(f"Model URI: {model_uri}")
+
+    model = mlflow.xgboost.load_model(model_uri)
+
+    # Replace locally stored model with UC production model
+    artifacts["model"] = model
+
+    print("\n✅ Production inference model ready")
+    print(f"   Model: {config.MLFLOW_MODEL_NAME}")
+    print(f"   Alias: @{config.PROD_MODEL_ALIAS}")
     print(f"   Features: {artifacts['metadata']['n_features']}")
-    
+
     return artifacts
 
 
@@ -284,6 +307,76 @@ def save_predictions(results, output_path=None):
     return output_path
 
 
+
+def save_predictions_to_delta(results):
+    """Upsert prediction results into the production Delta table."""
+
+    from delta.tables import DeltaTable
+
+    table_name = "workspace.default.employee_attrition_predictions"
+    model_version = get_prod_model_version()
+
+    output_df = results.copy()
+
+    # Match the existing Delta table schema
+    output_df["Employee_ID"] = output_df["Employee_ID"].astype(str)
+    output_df["Prediction"] = output_df["Prediction"].astype(str)
+    output_df["Attrition_Probability"] = (
+        output_df["Attrition_Probability"].astype(float)
+    )
+    output_df["Confidence"] = output_df["Confidence"].astype(float)
+    output_df["Risk_Category"] = output_df["Risk_Category"].astype(str)
+
+    output_df["Prediction_Date"] = pd.Timestamp.now().date()
+    output_df["Model_Version"] = model_version
+
+    schema = StructType([
+        StructField("Employee_ID", StringType(), True),
+        StructField("Prediction", StringType(), True),
+        StructField("Attrition_Probability", DoubleType(), True),
+        StructField("Confidence", DoubleType(), True),
+        StructField("Risk_Category", StringType(), True),
+        StructField("Prediction_Date", DateType(), True),
+        StructField("Model_Version", StringType(), True),
+    ])
+
+    spark = SparkSession.builder.getOrCreate()
+    spark_df = spark.createDataFrame(output_df, schema=schema)
+
+    # A MERGE source must have at most one row per employee.
+    duplicate_ids = (
+        spark_df.groupBy("Employee_ID")
+        .count()
+        .filter("count > 1")
+        .limit(1)
+        .count()
+    )
+    if duplicate_ids:
+        raise ValueError(
+            "Input predictions contain duplicate Employee_ID values."
+        )
+
+    print(f"Upserting {len(output_df):,} predictions into {table_name}")
+
+    delta_table = DeltaTable.forName(spark, table_name)
+
+    (
+        delta_table.alias("target")
+        .merge(
+            spark_df.alias("source"),
+            "target.Employee_ID = source.Employee_ID",
+        )
+        .whenMatchedUpdateAll()
+        .whenNotMatchedInsertAll()
+        .execute()
+    )
+
+    print(f"Predictions upserted successfully: {table_name}")
+    print(f"Model Version: {model_version}")
+    print(f"Records processed: {len(output_df):,}")
+
+
+
 # =============================================================================
 # COMPLETE SCORING PIPELINE
 # =============================================================================
@@ -323,6 +416,7 @@ def score_pipeline(test_file_path, save_output=True, explain=True):
     # Save predictions
     if save_output:
         save_predictions(predictions)
+        save_predictions_to_delta(predictions)
     
     print("\n" + "="*80)
     print("✅ SCORING PIPELINE COMPLETE")
@@ -331,11 +425,27 @@ def score_pipeline(test_file_path, save_output=True, explain=True):
     return predictions, shap_values
 
 
+def get_prod_model_version():
+    """Get the model version currently assigned to the @prod alias."""
+
+    client = mlflow.MlflowClient()
+
+    model_version = client.get_model_version_by_alias(
+        name=config.MLFLOW_MODEL_NAME,
+        alias=config.PROD_MODEL_ALIAS
+    )
+
+    return str(model_version.version)
+
+
 if __name__ == "__main__":
     # Test scoring pipeline
     print("Testing Scoring Pipeline...")
     try:
-        predictions, shap_values = score_pipeline(config.TEST_PATH)
+        predictions, shap_values = score_pipeline(
+            config.TEST_PATH,
+            save_output=True,
+            explain=False)
         print("\n✅ Scoring pipeline test complete!")
         print(f"   Generated {len(predictions)} predictions")
     except Exception as e:

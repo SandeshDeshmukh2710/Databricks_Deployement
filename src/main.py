@@ -1,3 +1,4 @@
+# ruff: noqa: F821
 # =============================================================================
 # ATTRITION ML PIPELINE - END-TO-END ORCHESTRATOR
 # =============================================================================
@@ -8,14 +9,12 @@ Pipeline:
 1. Feature Engineering
 2. Model Training
 3. Model Registry / MLflow
-4. Batch Scoring
 """
 
 import config
 from feature_engineering import prepare_features
 from model_registry import register_model_pipeline
 from model_training import train_model_pipeline
-from scoring import score_pipeline
 
 
 def main():
@@ -67,7 +66,7 @@ def main():
     print("STEP 3: MODEL REGISTRY / MLFLOW")
     print("=" * 80)
 
-    run_id, artifacts = register_model_pipeline(
+    run_id, model_version, artifacts = register_model_pipeline(
         model=model,
         X_train=data_splits["X_train"],
         y_train=data_splits["y_train"],
@@ -80,22 +79,13 @@ def main():
 
     print("\n✅ Model Registry completed")
     print(f"   MLflow Run ID: {run_id}")
+    print(f"   Model Version: {model_version}")
 
-    # =========================================================================
-    # 4. SCORING
-    # =========================================================================
-
-    print("\n" + "=" * 80)
-    print("STEP 4: BATCH SCORING")
-    print("=" * 80)
-
-    predictions, prediction_summary = score_pipeline(
-        config.TEST_PATH,
-        save_output=True,
-        explain=False
+    dbutils.jobs.taskValues.set(
+        key="model_version",
+        value=str(model_version)
     )
 
-    print("\n✅ Scoring completed")
 
     # =========================================================================
     # PIPELINE COMPLETE
@@ -109,15 +99,12 @@ def main():
     print(f"   MLflow Run ID:     {run_id}")
     print(f"   Features:          {len(features)}")
     print(f"   Test ROC-AUC:      {metrics['test']['roc_auc']:.4f}")
-    print(f"   Prediction Output: {config.OUTPUTS_DIR}/predictions.csv")
 
     return {
         "run_id": run_id,
         "metrics": metrics,
         "best_params": best_params,
-        "artifacts": artifacts,
-        "predictions": predictions,
-        "prediction_summary": prediction_summary
+        "artifacts": artifacts
     }
 
 
