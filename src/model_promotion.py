@@ -43,4 +43,13 @@ if __name__ == "__main__":
     alias = sys.argv[1]
     version = sys.argv[2]
 
-    set_model_alias(alias, version)
+    if alias == config.QA_MODEL_ALIAS:
+        promote_to_qa(version)
+
+    elif alias == config.PROD_MODEL_ALIAS:
+        promote_to_prod(version)
+
+    else:
+        raise ValueError(
+            f"Unsupported model alias: {alias}"
+        )

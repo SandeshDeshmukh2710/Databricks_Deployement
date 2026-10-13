@@ -42,7 +42,7 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
         run_name (str): MLflow run name
     
     Returns:
-        str: MLflow run ID
+        tuple: (mlflow_run_id, model_version)
     """
     print("\n" + "="*80)
     print("MLFLOW MODEL LOGGING")
@@ -68,12 +68,15 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
         signature = infer_signature(X_train, model.predict_proba(X_train))
         
         # Log model
-        mlflow.xgboost.log_model(
+        model_info = mlflow.xgboost.log_model(
             model,
             artifact_path="model",
             signature=signature,
             input_example=X_train.head(3),
-            registered_model_name=config.MLFLOW_MODEL_NAME)
+            registered_model_name=config.MLFLOW_MODEL_NAME,
+        )
+
+        model_version = model_info.registered_model_version
     
         # Log feature names as artifact
         with open("feature_names.json", "w") as f:
@@ -87,7 +90,7 @@ def log_model_to_mlflow(model, X_train, y_train, metrics, best_params,
         print(f"   Run ID: {run_id}")
         print(f"   Run Name: {run_name}")
     
-    return run_id
+    return run_id, model_version
 
 
 # =============================================================================
@@ -243,10 +246,10 @@ def register_model_pipeline(model, X_train, y_train, metrics, best_params,
         removed_features: Removed features
     
     Returns:
-        tuple: (mlflow_run_id, artifact_paths)
+        tuple: (mlflow_run_id, model_version, artifact_paths)
     """
     # Log to MLflow
-    run_id = log_model_to_mlflow(
+    run_id, model_version = log_model_to_mlflow(
         model, X_train, y_train, metrics, best_params, feature_names
     )
     
@@ -261,8 +264,7 @@ def register_model_pipeline(model, X_train, y_train, metrics, best_params,
     print(f"   MLflow Run ID: {run_id}")
     print(f"   Artifacts saved to: {config.MODELS_DIR}")
     
-    return run_id, artifact_paths
-
+    return run_id, model_version, artifact_paths
 
 if __name__ == "__main__":
     # Test loading artifacts

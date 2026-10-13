@@ -9,14 +9,12 @@ Pipeline:
 1. Feature Engineering
 2. Model Training
 3. Model Registry / MLflow
-4. Batch Scoring
 """
 
 import config
 from feature_engineering import prepare_features
 from model_registry import register_model_pipeline
 from model_training import train_model_pipeline
-from scoring import score_pipeline
 
 
 def main():
@@ -88,21 +86,6 @@ def main():
         value=str(model_version)
     )
 
-    # =========================================================================
-    # 4. SCORING
-    # =========================================================================
-
-    print("\n" + "=" * 80)
-    print("STEP 4: BATCH SCORING")
-    print("=" * 80)
-
-    predictions, prediction_summary = score_pipeline(
-        config.TEST_PATH,
-        save_output=True,
-        explain=False
-    )
-
-    print("\n✅ Scoring completed")
 
     # =========================================================================
     # PIPELINE COMPLETE
@@ -116,15 +99,12 @@ def main():
     print(f"   MLflow Run ID:     {run_id}")
     print(f"   Features:          {len(features)}")
     print(f"   Test ROC-AUC:      {metrics['test']['roc_auc']:.4f}")
-    print(f"   Prediction Output: {config.OUTPUTS_DIR}/predictions.csv")
 
     return {
         "run_id": run_id,
         "metrics": metrics,
         "best_params": best_params,
-        "artifacts": artifacts,
-        "predictions": predictions,
-        "prediction_summary": prediction_summary
+        "artifacts": artifacts
     }
 
 

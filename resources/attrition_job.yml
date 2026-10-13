@@ -4,11 +4,43 @@ resources:
       name: "[${bundle.target}] Employee Attrition ML Pipeline"
 
       tasks:
-        - task_key: run_attrition_pipeline
-
+        - task_key: train_and_register
           spark_python_task:
             python_file: ../src/main.py
+          environment_key: default
 
+        - task_key: promote_to_qa
+          depends_on:
+            - task_key: train_and_register
+          spark_python_task:
+            python_file: ../src/model_promotion.py
+            parameters:
+              - qa
+              - "{{tasks.train_and_register.values.model_version}}"
+          environment_key: default
+
+        - task_key: validate_qa_model
+          depends_on:
+            - task_key: promote_to_qa
+          spark_python_task:
+            python_file: ../src/model_validation.py
+          environment_key: default
+
+        - task_key: promote_to_prod
+          depends_on:
+            - task_key: validate_qa_model
+          spark_python_task:
+            python_file: ../src/model_promotion.py
+            parameters:
+              - prod
+              - "{{tasks.train_and_register.values.model_version}}"
+          environment_key: default
+
+        - task_key: score_with_prod_model
+          depends_on:
+            - task_key: promote_to_prod
+          spark_python_task:
+            python_file: ../src/scoring.py
           environment_key: default
 
       environments:
@@ -18,4 +50,3 @@ resources:
             dependencies:
               - "xgboost"
               - "optuna==3.6.1"
-                      
